@@ -8,9 +8,9 @@ spring:
     username: ENC(YrUPSBpVSPYWelNMXaLAgg==)
     password: ENC(CVZQiNrXQOFKp/7dn/E9gZvMKoeggpKo)
   redis:
-    host: www.lanyuhuitong.cn
+    host: ENC(kOu/lpnXarjupYbGSGwxuZNgrFliwEGYxNMggU8l2KE=)
     port: 6379
-    password: 123456
+    password: ENC(CX6lEpqLTG6DQMBDFhtifg==)
     timeout: 5000ms
     jedis:
       pool:
@@ -48,8 +48,8 @@ swagger:
     password: swagger-true
 
 ftpconfig:
-  userName: Qxapi
-  password: Max@3#Sdsl$5%
-  ip: 10.219.85.65
+  userName: ENC(4UQ26KKLMohKu/0UEEiFqQ==)
+  password: ENC(rqzPwk5cIpNhhu9cAXclQHzoHtpvWuWw)
+  ip: ENC(W4HrcT7ETgV/1njvKBob+5QA6XsyVtNW)
   port: 21
-  filepath: hh
+  filepath: ENC(x0yOMHDKqbXod4nW8iGKPA==)

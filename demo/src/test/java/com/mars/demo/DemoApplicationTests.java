@@ -17,8 +17,8 @@ public class DemoApplicationTests {
 
     @Test
     public void contextLoads() {
-        String s2 = encryptor.encrypt("root");
-        String s3 = encryptor.encrypt("xiaobumac0520");
+        String s2 = encryptor.encrypt("1");
+        String s3 = encryptor.encrypt("2");
         System.out.println(s2);
         System.out.println(s3);
         System.out.println(encryptor.decrypt(s2));
