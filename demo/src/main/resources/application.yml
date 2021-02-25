@@ -1,0 +1,55 @@
+server:
+  port: 8000
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/mars?autoReconnect=true&allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false&tinyInt1isBit=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ENC(YrUPSBpVSPYWelNMXaLAgg==)
+    password: ENC(CVZQiNrXQOFKp/7dn/E9gZvMKoeggpKo)
+  redis:
+    host: www.lanyuhuitong.cn
+    port: 6379
+    password: 123456
+    timeout: 5000ms
+    jedis:
+      pool:
+        max-wait: 1000ms
+        max-active: 10
+        max-idle: 10
+        min-idle: 5
+
+mybatis:
+  mapper-locations: classpath:/mapper/**/*Mapper.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jasypt:
+  encryptor:
+    password: demo-passowrd
+
+mars:
+  ase:
+    aesEncrypt:
+      key: marsxiaobuasekey
+      iv: marsxiaobuxzpxzp
+  whiteurl:
+    whiteUrlWithLogin:
+      - /test/white
+      - /api/admin/update/password
+    blackUrlWithLogin:
+      - /test/black
+
+swagger:
+  production: false
+  basic:
+    enable: true
+    username: admin
+    password: swagger-true
+
+ftpconfig:
+  userName: Qxapi
+  password: Max@3#Sdsl$5%
+  ip: 10.219.85.65
+  port: 21
+  filepath: hh

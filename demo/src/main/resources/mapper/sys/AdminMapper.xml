@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mars.demo.dao.sys.AdminMapper">
+
+    <resultMap id="resultMap_user" type="com.mars.demo.bean.entity.SysUser">
+        <id column="id" property="id"></id>
+        <result column="uuid" property="uuid"></result>
+        <result column="account" property="account"></result>
+        <result column="password" property="password"></result>
+        <result column="salt" property="salt"></result>
+        <result column="status" property="status"></result>
+        <result column="name" property="name"></result>
+        <result column="birthday" property="birthday"></result>
+        <result column="telephone" property="telephone"></result>
+        <result column="email" property="email"></result>
+        <collection property="roleList" ofType="com.mars.demo.bean.entity.SysRole" select="queryUserRoleRelation" column="uuid" ></collection>
+    </resultMap>
+
+    <resultMap id="resultMap_role" type="com.mars.demo.bean.entity.SysRole">
+        <id column="id" property="id"></id>
+        <result column="uuid" property="uuid"></result>
+        <result column="name" property="name"></result>
+        <result column="status" property="status"></result>
+        <collection property="menuList" ofType="com.mars.demo.bean.entity.SysMenu" select="queryRoleMenuRelation" column="{uuid = uuid, category = category}" ></collection>
+    </resultMap>
+
+    <resultMap id="resultMap_menu" type="com.mars.demo.bean.entity.SysMenu">
+        <id column="id" property="id"></id>
+        <result column="uuid" property="uuid"></result>
+        <result column="parent_uuid" property="parentUuid"></result>
+        <result column="category" property="category"></result>
+        <result column="name" property="name"></result>
+        <result column="auth_code" property="authCode"></result>
+        <result column="sort" property="sort"></result>
+        <result column="icon" property="icon"></result>
+        <result column="status" property="status"></result>
+    </resultMap>
+
+    <insert id="saveUser" parameterType="com.mars.demo.bean.entity.SysUser">
+        <if test="id != null">
+            UPDATE sys_user
+            <set>
+                <if test="password != null and password != ''">
+                    password = #{password},
+                </if>
+                <if test="salt != null and salt != ''">
+                    salt = #{salt},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+                <if test="name != null and name != ''">
+                    name = #{name},
+                </if>
+                <if test="birthday != null and birthday != ''">
+                    birthday = #{birthday},
+                </if>
+                <if test="telephone != null and telephone != ''">
+                    telephone = #{telephone},
+                </if>
+                <if test="email != null and email != ''">
+                    email = #{email},
+                </if>
+            </set>
+            WHERE id = #{id};
+        </if>
+        <if test="id == null">
+            INSERT sys_user(uuid, account, password, salt, name, birthday, telephone, email)
+            VALUES (#{uuid}, #{account}, #{password}, #{salt}, #{name}, #{birthday}, #{telephone}, #{email});
+        </if>
+        <if test="roleId != null and roleId != ''">
+            INSERT sys_user_role_relation(user_uuid, role_uuid) VALUES
+            <foreach item="item" index="index" collection="roleId.split(',')"  open="(" separator="," close=")">
+                #{uuid}, #{item}
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="saveRole" parameterType="com.mars.demo.bean.entity.SysRole">
+        <if test="id != null">
+            UPDATE sys_role
+            <set>
+                <if test="name != null and name != ''">
+                    name = #{name},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+            </set>
+            WHERE id = #{id};
+        </if>
+        <if test="id == null">
+            INSERT sys_role(uuid, name)
+            VALUES (#{uuid}, #{name});
+        </if>
+        <if test="menuId != null and menuId != ''">
+            INSERT sys_role_menu_relation(role_uuid, menu_uuid) VALUES
+            <foreach item="item" index="index" collection="menuId.split(',')"  open="(" separator="," close=")">
+                #{uuid}, #{item}
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="saveMenu" parameterType="com.mars.demo.bean.entity.SysMenu">
+        <if test="id != null">
+            UPDATE sys_menu
+            <set>
+                <if test="parentUuid != null and parentUuid != ''">
+                    parent_uuid = #{parentUuid},
+                </if>
+                <if test="category != null">
+                    category = #{category},
+                </if>
+                <if test="name != null and name != ''">
+                    name = #{name},
+                </if>
+                <if test="authCode != null and authCode != ''">
+                    auth_code = #{authCode},
+                </if>
+                <if test="sort != null">
+                    sort = #{sort},
+                </if>
+                <if test="icon != null and icon != ''">
+                    icon = #{icon},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+            </set>
+            WHERE id = #{id};
+        </if>
+        <if test="id == null">
+            INSERT sys_menu(uuid, parent_uuid, category, name, auth_code, sort, icon)
+            VALUES (#{uuid}, #{parentUuid}, #{category}, #{name}, #{authCode}, #{sort}, #{icon});
+        </if>
+    </insert>
+
+    <select id="listUser" resultType="com.mars.demo.bean.entity.SysUser">
+        SELECT id, uuid, account, status, name, birthday, telephone, email FROM sys_user
+    </select>
+
+    <select id="listRole" resultType="com.mars.demo.bean.entity.SysRole">
+        SELECT id, uuid, name, status FROM sys_role
+    </select>
+
+    <select id="listMenu" resultMap="resultMap_menu">
+        SELECT id, uuid, parent_uuid, name, auth_code, sort, icon, status FROM sys_menu WHERE category = #{category}
+    </select>
+
+    <select id="listUserRole"  resultMap="resultMap_user">
+        SELECT id, uuid, account, status, name, birthday, telephone, email FROM sys_user
+    </select>
+
+    <select id="listRoleMenu" resultMap="resultMap_role">
+         SELECT id, uuid, name, status, #{category} AS category FROM sys_role
+    </select>
+
+    <select id="queryUserRoleRelation" resultType="com.mars.demo.bean.entity.SysRole">
+        SELECT ro.id, ro.uuid, ro.name, ro.status FROM sys_user_role_relation ur
+        JOIN sys_role ro ON ur.role_uuid = ro.uuid AND ur.user_uuid = #{uuid}
+    </select>
+
+    <select id="queryRoleMenuRelation" resultType="com.mars.demo.bean.entity.SysMenu">
+        SELECT m.id, m.uuid, m.parent_uuid AS parentUuid, m.name, m.auth_code AS authCode, m.sort, m.icon, m.status, m.category FROM sys_role_menu_relation rm
+        JOIN sys_menu m ON rm.menu_uuid = m.uuid AND rm.role_uuid = #{uuid} AND category = #{category}
+    </select>
+
+</mapper>

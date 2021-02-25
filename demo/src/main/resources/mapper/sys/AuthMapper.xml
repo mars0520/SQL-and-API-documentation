@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mars.demo.dao.sys.AuthMapper">
+
+    <select id="queryUserInfo" resultType="com.mars.demo.bean.entity.AuthUser">
+        SELECT
+            us.id,
+            us.uuid,
+            us.account,
+            us.password,
+            us.salt,
+            us.status,
+            us.name,
+            DATE_FORMAT(us.birthday, '%Y-%m-%d') AS birthday,
+            us.telephone,
+            us.email,
+            GROUP_CONCAT(ro.uuid) AS roleId
+        FROM sys_user us
+        LEFT JOIN sys_user_role_relation ur ON ur.user_uuid = us.uuid
+        LEFT JOIN sys_role ro ON ur.role_uuid = ro.uuid
+        WHERE us.account = #{account}
+        GROUP BY us.id LIMIT 1;
+    </select>
+
+    <select id="queryPermission" resultType="java.lang.String">
+        SELECT m.auth_code FROM sys_menu m
+        JOIN sys_role_menu_relation rr ON m.uuid = rr.menu_uuid
+            AND m.category = 1 AND m.status = 0
+        JOIN sys_role ro ON ro.uuid = rr.role_uuid
+            AND rr.role_uuid IN
+        <foreach item="item" index="index" collection="roleId.split(',')"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY m.id
+    </select>
+
+    <select id="queryMenu" resultType="com.mars.demo.bean.dto.UserMenusDTO">
+        SELECT m.id, m.uuid, m.parent_uuid AS parentUuid, m.name, m.auth_code AS authCode, m.sort, m.icon
+        FROM sys_menu m
+        JOIN sys_role_menu_relation rr ON m.uuid = rr.menu_uuid
+            AND m.category = 0 AND m.status = 0
+        JOIN sys_role ro ON ro.uuid = rr.role_uuid
+            AND rr.role_uuid IN
+        <foreach item="item" index="index" collection="roleId.split(',')"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY m.id
+    </select>
+
+</mapper>

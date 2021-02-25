@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mars.demo.dao.BaseMapper">
+
+    <select id="getInfoByTableName" resultType="java.util.Map">
+        SELECT ${column} FROM ${tableName} WHERE id = #{id} LIMIT 1;
+    </select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+        SELECT 1 FROM ${tableName} WHERE ${columnValue} LIMIT 1;
+    </select>
+
+    <select id="getIdByUuId" resultType="java.lang.Integer">
+        SELECT id FROM ${tableName} WHERE uuid = #{uuid};
+    </select>
+
+    <select id="getIdsByUuId" resultType="java.lang.Integer">
+        SELECT id FROM ${tableName} WHERE uuid IN
+        <foreach item="item" index="index" collection="uuid.split(',')"  open="(" separator="," close=")">
+            #{item}
+        </foreach>;
+    </select>
+
+    <select id="getColumnInfoByTableName" resultType="com.mars.demo.bean.dto.SqlWordDTO" parameterType="java.lang.String">
+        /* mysql */
+        SELECT
+            (SELECT TABLE_COMMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'mars' AND TABLE_NAME = #{tableName}) AS tableName,
+            ORDINAL_POSITION AS number,
+            COLUMN_NAME AS code,
+            COLUMN_COMMENT AS name,
+            IF(COLUMN_KEY = 'PRI', '√', '') AS isPrimary,
+            COLUMN_TYPE AS type,
+            NUMERIC_SCALE AS `decimal`,
+            IF(IS_NULLABLE = 'YES', '√', '') AS isNull,
+            COLUMN_DEFAULT AS defaultValue
+        FROM information_schema.`COLUMNS`
+        WHERE TABLE_SCHEMA = 'mars' AND TABLE_NAME = #{tableName}
+        ORDER BY TABLE_NAME, ORDINAL_POSITION;
+        /* sqlserver */
+        /*SELECT
+            (case when a.colorder = 1 then isnull(f.value,'') else '' end) AS tableName,
+            a.colorder AS number,
+            a.name AS code,
+            isnull(g.[value],'') AS name,
+            (case when exists(SELECT 1 FROM sysobjects where xtype='PK' and parent_obj=a.id and name in (SELECT name FROM sysindexes WHERE indid in( SELECT indid FROM sysindexkeys WHERE id = a.id AND colid=a.colid))) then '√' else '' end) isPrimary,
+            b.name + '(' + CAST(COLUMNPROPERTY(a.id,a.name,'PRECISION') AS VARCHAR) + ')' AS type,
+            isnull(COLUMNPROPERTY(a.id,a.name,'Scale'),0) AS decimal,
+            (case when a.isnullable = 1 then '√' else '' end) AS isNull,
+            isnull(e.text,'') defaultValue
+        FROM syscolumns a
+        INNER JOIN systypes b ON a.xusertype = b.xusertype
+        INNER JOIN sysobjects d ON a.id = d.id AND d.name = #{tableName}
+        LEFT JOIN syscomments e ON a.cdefault = e.id
+        LEFT JOIN sys.extended_properties g ON a.id = G.major_id AND a.colid = g.minor_id
+        LEFT JOIN sys.extended_properties f ON d.id = f.major_id AND f.minor_id = 0
+        ORDER BY a.colorder;*/
+    </select>
+
+    <select id="getTableName" resultType="java.lang.String">
+        /* mysql */
+        SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'mars';
+        /* sqlserver */
+        /* SELECT NAME FROM SYS.TABLES; */
+    </select>
+
+    <delete id="removeByTableName">
+        DELETE FROM ${tableName} WHERE id = #{id} LIMIT 1;
+    </delete>
+
+    <delete id="removeByTableNameIn">
+        DELETE ${tableName} FROM ${tableName} JOIN (SELECT id FROM ${tableName} WHERE ${column} IN
+        <foreach item="item" index="index" collection="uuid.split(',')"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        )s ON ${tableName}.id = s.id;
+    </delete>
+
+    <insert id="createData">
+        INSERT INTO ${tableName} (${column})
+        VALUES ${values}
+    </insert>
+
+</mapper>
