@@ -60,11 +60,12 @@ public class WordController extends BaseController {
         XWPFDocument document = null;
         FileOutputStream out = null;
         try{
-            in = new FileInputStream(new File("../" + wordEnum +".docx"));
-            document = new XWPFDocument(in);
             if(WordEnum.SQL.equals(wordEnum)) {
+                in = new FileInputStream(new File("../" + wordEnum +".docx"));
+                document = new XWPFDocument(in);
                 wordService.sqlWord(document);
             } else {
+                document = new XWPFDocument();
                 wordService.apiWord(document);
             }
             String fileName = wordEnum + "-" + new Random().nextInt(9999);
